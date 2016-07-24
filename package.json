@@ -1,0 +1,21 @@
+{
+  "name": "country_graph",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.4.1",
+    "config": "^1.21.0",
+    "crawler": "^0.4.3",
+    "ejs": "^2.4.2",
+    "express": "^4.14.0",
+    "mongoose": "^4.5.3",
+    "morgan": "^1.7.0",
+    "socket.io": "^1.4.8"
+  }
+}

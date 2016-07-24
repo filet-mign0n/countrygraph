@@ -1,0 +1,194 @@
+var w = $(window).width()-30
+var h = $(window).height()-90
+var r = 30
+
+var countries = ["Norway", "Finland", "Japan"]
+
+$(document).ready(function() { 
+
+    function myGraph(el) {
+        
+        this.addNode = function (id, img) {
+            nodes.push({"id":id, "img": img});
+            update();
+
+        }
+
+        this.removeNode = function (id) {
+            var i = 0;
+            var n = findNode(id);
+            while (i < links.length) {
+                if ((links[i]['source'] === n)||(links[i]['target'] == n)) links.splice(i,1);
+                else i++;
+            }
+            var index = findNodeIndex(id);
+            if(index !== undefined) {
+                nodes.splice(index, 1);
+                update();
+            }
+        }
+
+        this.addLink = function (sourceId, targetId, dist) {
+            var sourceNode = findNode(sourceId);
+            var targetNode = findNode(targetId);
+            var dist = parseInt(dist)
+
+            console.log('this.addLink with args :\n'+sourceId+' '+targetId+' '+dist)
+            if((sourceNode !== undefined) && (targetNode !== undefined) && dist > 0) {
+            	console.log('pushing links')
+                links.push({"source": sourceNode, "target": targetNode, "dist": dist});
+                update();
+            }
+        }
+
+        var findNode = function (id) {
+            for (var i=0; i < nodes.length; i++) {
+                if (nodes[i].id === id)
+                    return nodes[i]
+            };
+        }
+
+        var findNodeIndex = function (id) {
+            for (var i=0; i < nodes.length; i++) {
+                if (nodes[i].id === id)
+                    return i
+            };
+        }
+
+        var vis = this.vis = d3.select(el).append("svg:svg")
+            .attr("width", w)
+            .attr("height", h);
+
+        var force = this.force = d3.layout.force()
+            .gravity(.05)
+            .charge(-100)
+            .size([w, h])
+            .distance(100)
+            .linkDistance( function(link) {
+            	return link.dist
+            });
+
+        var nodes = force.nodes(),
+            links = force.links();
+
+    	var l1 = vis.append('g'),
+            l2 = vis.append('g');
+
+        var update = function (t) {
+
+            var node = l2.selectAll("g.node")
+                .data(nodes)//, function(d) { return d.id;});
+
+            var nodeEnter = node.enter().append("g")
+                .attr("class", "node")
+                .call(force.drag);
+
+            nodeEnter.append('circle')
+                .attr("cx", "0px")
+                .attr("cy", "0px")
+            	.attr("r", 27)
+            	.style({"fill": "grey", "opacity": 0.2})
+
+            nodeEnter.append("image")
+                .attr("xlink:href", function(d) { return 'https://'+d.img})
+                .attr("x", "-13px")
+                .attr("y", "-23px")
+                .attr("width", "26px")
+                .attr("height", "26px");
+
+            nodeEnter.append("text")
+                .attr("class", "nodetext")
+                .attr("dy", "15")
+                .attr("text-anchor", "middle")
+                .text(function(d) {return d.id});
+
+            node.exit().remove();
+
+            var link = l1.selectAll("line.link")
+                .data(links)
+
+            link.enter().append("line")
+                .attr("class", "link")
+                .style("stroke", "#ccc")
+                .style("opacity", 0.7)
+
+            link.exit().remove();
+
+            force.on('tick', function() {
+
+                var nw = $(window).width()-30
+                var nh = $(window).height()-90
+
+                node.attr("transform", function(d) { return "translate(" + Math.max(r, Math.min(nw - r, d.x)) + "," + Math.max(r, Math.min(nh - r, d.y)) + ")"; });
+                
+                link
+                  .attr("x1", function(d) { return  Math.max(r, Math.min(nw - r, d.source.x))})
+                  .attr("y1", function(d) { return Math.max(r, Math.min(nh - r, d.source.y))})
+                  .attr("x2", function(d) { return Math.max(r, Math.min(nw - r, d.target.x))})
+                  .attr("y2", function(d) { return Math.max(r, Math.min(nh - r, d.target.y))})
+
+            });
+
+            // Restart the force layout.
+            force.start();
+            // Keep alive
+            force.on("end", function() { force.alpha(0.01)});
+        }
+
+        update(this);
+        
+    }
+
+    var graph = new myGraph("#graph")
+
+    var ws = function(ws_url) {
+    	console.log('ws started')
+		var socket = io.connect(ws_url)
+
+        socket.emit('c', countries)
+
+		socket.on('crawl', function(data) {
+
+			console.log("received data from ws: ",data)
+
+			//parsed_data = JSON.parse(data)
+			
+
+			if (data.type == 'node') {
+				graph.addNode(data.name, data.img)
+			} 
+			else if (data.type == 'link') {
+				if (data.dist > 1)
+					var dist = (1/data.dist)*1400
+					//var dist = parsed_data.dist >= 5 ? (1/parsed_data.dist)*1400 : 100
+					graph.addLink(data.source, data.target, dist)
+			}
+			else {console.log('\nweird crawl packet received :-/')}
+
+		})
+
+        $(window).on("beforeunload", function() { 
+            console.log('disconnecting socket before closing window')
+            socket.disconnect()
+        })
+    }   
+
+    $(window).resize(function() {
+        console.log('WINDOW RESIZE!')
+        new_w = $(window).width()-30
+        new_h = $(window).height()-90
+
+        graph.vis
+            .attr('height', new_h) 
+            .attr( 'width', new_w)
+            
+    	graph.force 
+    		.size([$(window).width(), $(window).height()])
+    })
+
+
+
+
+    ws('ws://localhost:8000')
+
+})

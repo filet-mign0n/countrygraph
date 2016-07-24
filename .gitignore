@@ -1,0 +1,10 @@
+*~
+*.swp
+*.swo
+*.pyc
+.npm
+.grunt
+node_modules
+npm-debug.log*
+test.js
+test_client.js
