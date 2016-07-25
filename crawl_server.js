@@ -9,19 +9,6 @@ const source_url = 'https://en.wikipedia.org'
 
 var emittedCountries = []
 
-function isInArray(value, array) {
-  return array.indexOf(value) > -1;
-}
-
-/*
-function createCompareArray(c, nc, country) {
-    var countriesSorted = c.concat(nc)
-    countriesSorted.splice(countriesSorted.indexOf(country), 1)
-
-    return countriesSorted
-}
-*/
-
 module.exports = function(httpServer) {
 
         var io = require('socket.io')(httpServer)
@@ -68,6 +55,7 @@ function noCrawl(socket, countryList) {
             })
             .then(function(c) {
                 return new Promise(function(res, rej) { 
+                    console.log('Crawl: graph node about to be emitted: ', c)
                     socket.emit('crawl', c)
                     emittedCountries.push(c.name)
                     res( { name: c.name } )
@@ -93,59 +81,11 @@ function noCrawl(socket, countryList) {
                 if (compareArray.length) return compare(socket, c.name, compareArray)            
                 else return Promise.resolve()
             })
-            /*.then(function(country) {
-                if (country.links) {
-                    for (i in country.links) {
-                        socket.emit('crawl', JSON.parse(country.links[i]));
-                        //console.log('sent crawl event with links: '+country.links)
-                    }
-                } else { Promise.resolve() }
-            })*/
-            .catch(function(e) { console.log(e) })
+            .catch(function(e) { console.log("noCrawl error", e) })
     })
 
     return r
 
-}
-
-function compare(socket, country, countries) {
-    console.log('\ncompare', country, countries)
-
-    r = Promise.resolve()
-    return new Promise(function(res, rej) {
-
-        countries.forEach(function(otherCountry, i, arr) {
-            console.log('compare countries forEach', otherCountry)
-            
-            r = r
-                .then(function() {
-                    return db.checkIfLink(country, otherCountry)
-                })
-                .then(function(c) {
-                    if (!c) {
-                        console.log('no link between', country, 'and', otherCountry, 'engaging wc.py_compare_freqDist')
-                        return wc.py_compare_freqDist(country, otherCountry)
-                    } else {
-                        console.log('found link between', country, 'and', otherCountry, ':\n', c)
-                        return Promise.resolve(c)
-                    }
-                }) 
-                .then(function(c) {
-                    return new Promise(function(res, rej) {   
-                        console.log('final', c)
-                        socket.emit('crawl', c)
-                        res()
-                    })
-                })
-                .catch(function(e) { rej(e) })
-
-            if (i == arr.length-1) res()
-        
-        })
-
-        return r
-
-    })
 }
 
 
@@ -193,16 +133,17 @@ function Crawl(socket, countryList) {
                                     return secondQueue(country, socket)
                                 })
                                 .then(wc.py_freqDist)
-                                //TODO
-                                .then(function(country) {
-                                    if (country.links) {
-                                        for (i in country.links) {
-                                            socket.emit('crawl', JSON.parse(country.links[i]));
-                                            console.log('sent crawl event with links: '+country.links)
-                                        }
-                                    } else { Promise.resolve() }
+                                .then(function(c) {
+                                    // copy current list of emitted nodes
+                                    var compareArray = emittedCountries.slice()
+                                    // remove current country from list
+                                    compareArray.splice(compareArray.indexOf(c.name), 1)
+                                    console.log(c.name+'\'s compareArray', compareArray)
+
+                                    if (compareArray.length) return compare(socket, c.name, compareArray)            
+                                    else return Promise.resolve()
                                 })
-                                .catch(function(e) { console.log(e) })
+                                .catch(function(e) { console.log("Crawl error",e) })
                         }
                 })   
                 return r
@@ -220,17 +161,16 @@ function Crawl(socket, countryList) {
 containing the token "history" and persists the data to the `countries` collection */
 function secondQueue(country, socket) {
 
-    console.log("\nsecond queue "+country.name+"\n") 
+    console.log("\nsecondQueue "+country.name+"\n") 
     
     return new Promise( function(res, rej) {
 
         c.queue({
             
             uri: country.url,
-            
             callback: function (error, result, $) {
                 
-                if (error) throw (error)
+                if (error) rej("secondQeue " + error)
 
                 if ($('table.infobox').eq(0).find('img').attr('src')) {
                     var img_url = $('table.infobox').eq(0).find('img').attr('src')
@@ -239,8 +179,9 @@ function secondQueue(country, socket) {
                 
                 //emit vertex data, edges will be caclulate at next step
                 var node = {type: 'node', name: country.name, img: country.flag}
-                console.log('graph node about to be emitted: ', node)
+                console.log('secondQeue: graph node about to be emitted: ', node)
                 socket.emit('crawl', node)
+                emittedCountries.push(country.name)
 
                 db.update_country(country.name, 
                     {$push: 
@@ -259,5 +200,50 @@ function secondQueue(country, socket) {
                 }
             })
         })
+}
+
+
+function compare(socket, country, countries) {
+    console.log('\ncompare', country, countries)
+
+    r = Promise.resolve()
+    return new Promise(function(res, rej) {
+
+        countries.forEach(function(otherCountry, i, arr) {
+            console.log('compare countries forEach', otherCountry)
+            
+            r = r
+                .then(function() {
+                    return db.checkIfLink(country, otherCountry)
+                })
+                .then(function(c) {
+                    if (!c) {
+                        console.log('no link between', country, 'and', otherCountry, 'engaging wc.py_compare_freqDist')
+                        return wc.py_compare_freqDist(country, otherCountry)
+                    } else {
+                        console.log('found link between', country, 'and', otherCountry, ':\n', c)
+                        return Promise.resolve(c)
+                    }
+                }) 
+                .then(function(c) {
+                    return new Promise(function(res, rej) {   
+                        console.log('final', c)
+                        socket.emit('crawl', c)
+                        res()
+                    })
+                })
+                .catch(function(e) { rej(e) })
+
+            if (i == arr.length-1) res()
+        
+        })
+
+        return r
+
+    })
+}
+
+function isInArray(value, array) {
+  return array.indexOf(value) > -1;
 }
 

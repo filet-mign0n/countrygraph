@@ -45,8 +45,9 @@ def compare(country, otherCountry):
 	db.countries.update_one({"name": country}, {"$push" : { "edges" : { "country": otherCountry, "dist": bg_dist }}})
 	db.countries.update_one({"name": otherCountry}, {"$push" : { "edges" : { "country": country, "dist": bg_dist }}})
 
-	ret = '{ "type": "link", "source": "%s", "target": "%s", "dist" : "%s"}' % (country, otherCountry, bg_dist)
-	print json.dumps(ret)
+	#ret = '{ "type": "link", "source": "%s", "target": "%s", "dist" : "%s"}' % (country, otherCountry, bg_dist)
+	#print json.dumps(ret)
+	print bg_dist
 
 compare(country, otherCountry)
 

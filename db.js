@@ -138,7 +138,7 @@ exports.checkIfLink = function(country, otherCountry) {
 					console.log('!BA.ret')
 					res(null) 
 				} else {
-					res({ type: "link", source: country, target: otherCountry, "dist" : BA.ret }) 
+					res({ type: "link", source: country, target: otherCountry, dist: BA.ret }) 
 				}
 			})
 			.catch(function(e) {

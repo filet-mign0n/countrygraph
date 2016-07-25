@@ -46,8 +46,10 @@ module.exports.py_compare_freqDist = function(country, otherCountry) {
           console.log('no stdout');
           resolve(country)
         } else {
-          console.log('compare_freqDist.py done, with JSON.parse(stdout)', stdout, stderr)
-          resolve(JSON.parse(stdout))
+          console.log('compare_freqDist.py between', country, otherCountry, 'done, with bg_dist', stdout, stderr)
+          if (!isNaN(parseInt(stdout))) {
+            resolve({ type: "link", source: country, target: otherCountry, dist: parseInt(stdout) })
+          } else { resolve(country) }
         }  
 
     })
