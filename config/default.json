@@ -3,6 +3,5 @@
 		"host": "localhost",
 		"port": 27017,
 		"db": "world" 
-	},
-	"country_list": ["Norway", "Finland"]
+	}
 }

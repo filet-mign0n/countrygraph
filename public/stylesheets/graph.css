@@ -1,0 +1,29 @@
+#countries {
+	position: relative;
+	text-align:center;
+}
+#graph {
+	position: relative;
+	text-align:center;
+}
+input[type="text"] {
+	width: 500px;
+	padding: 5px;
+	border: solid 1px #fff;
+	box-shadow: inset 1px 1px 2px 0 #707070;
+	transition: box-shadow 0.3s;
+	background-color: darkgray;
+	color: blackgreen;
+	font-size: 100%;
+	text-align: center;
+}
+input[type="text"]:focus,
+input[type="text"].focus {
+  box-shadow: inset 1px 1px 2px 0 #c9c9c9;
+}
+#button {
+	border: solid 1px #fff;
+	margin:1;
+	padding:4.5;
+	font-size: 100%;
+}

@@ -1,17 +1,57 @@
-var w = $(window).width()-30
-var h = $(window).height()-90
-var r = 30
+var socket;
+var w = $(window).width()-30;
+var h = $(window).height()-90;
+var r = 30;
 
-var countries = ["Norway", "Finland", "Japan"]
+$(document).ready(function() {
 
-$(document).ready(function() { 
+    var graph = new myGraph("#graph")
+    ws('ws://localhost:8000')
+
+    $('#button').click(function() {
+        graph.reset()
+        click($('#query').val())
+    })
+
+    function click(input_value) {
+        var countries = input_value.split(/[ ,]+/);
+        socket.emit('c', countries)
+    }
+
+    function ws(ws_url) {
+        console.log('ws started')
+        socket = io.connect(ws_url)
+
+        //socket.emit('c', countries)
+
+        socket.on('crawl', function(data) {
+
+            console.log("received data from ws: ",data)
+
+            if (data.type == 'node') {
+                graph.addNode(data.name, data.img)
+            } 
+            else if (data.type == 'link') {
+                if (data.dist > 1)
+                    var dist = (1/data.dist)*1400
+                    //var dist = parsed_data.dist >= 5 ? (1/parsed_data.dist)*1400 : 100
+                    graph.addLink(data.source, data.target, dist)
+            }
+            else {console.log('\nweird crawl packet received :-/')}
+
+        })
+
+        $(window).on("beforeunload", function() { 
+            console.log('disconnecting socket before closing window')
+            socket.disconnect()
+        })
+    } 
 
     function myGraph(el) {
         
         this.addNode = function (id, img) {
             nodes.push({"id":id, "img": img});
             update();
-
         }
 
         this.removeNode = function (id) {
@@ -53,6 +93,12 @@ $(document).ready(function() {
                 if (nodes[i].id === id)
                     return i
             };
+        }
+
+        this.reset = function() {
+            nodes.length = 0
+            links.length = 0
+            update()
         }
 
         var vis = this.vis = d3.select(el).append("svg:svg")
@@ -122,7 +168,7 @@ $(document).ready(function() {
                 node.attr("transform", function(d) { return "translate(" + Math.max(r, Math.min(nw - r, d.x)) + "," + Math.max(r, Math.min(nh - r, d.y)) + ")"; });
                 
                 link
-                  .attr("x1", function(d) { return  Math.max(r, Math.min(nw - r, d.source.x))})
+                  .attr("x1", function(d) { return Math.max(r, Math.min(nw - r, d.source.x))})
                   .attr("y1", function(d) { return Math.max(r, Math.min(nh - r, d.source.y))})
                   .attr("x2", function(d) { return Math.max(r, Math.min(nw - r, d.target.x))})
                   .attr("y2", function(d) { return Math.max(r, Math.min(nh - r, d.target.y))})
@@ -139,40 +185,6 @@ $(document).ready(function() {
         
     }
 
-    var graph = new myGraph("#graph")
-
-    var ws = function(ws_url) {
-    	console.log('ws started')
-		var socket = io.connect(ws_url)
-
-        socket.emit('c', countries)
-
-		socket.on('crawl', function(data) {
-
-			console.log("received data from ws: ",data)
-
-			//parsed_data = JSON.parse(data)
-			
-
-			if (data.type == 'node') {
-				graph.addNode(data.name, data.img)
-			} 
-			else if (data.type == 'link') {
-				if (data.dist > 1)
-					var dist = (1/data.dist)*1400
-					//var dist = parsed_data.dist >= 5 ? (1/parsed_data.dist)*1400 : 100
-					graph.addLink(data.source, data.target, dist)
-			}
-			else {console.log('\nweird crawl packet received :-/')}
-
-		})
-
-        $(window).on("beforeunload", function() { 
-            console.log('disconnecting socket before closing window')
-            socket.disconnect()
-        })
-    }   
-
     $(window).resize(function() {
         console.log('WINDOW RESIZE!')
         new_w = $(window).width()-30
@@ -182,13 +194,8 @@ $(document).ready(function() {
             .attr('height', new_h) 
             .attr( 'width', new_w)
             
-    	graph.force 
-    		.size([$(window).width(), $(window).height()])
-    })
-
-
-
-
-    ws('ws://localhost:8000')
+        graph.force 
+            .size([$(window).width(), $(window).height()])
+    })  
 
 })

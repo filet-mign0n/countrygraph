@@ -62,11 +62,31 @@ exports.getCountryInfo = function(title) {
 			if (c) {
 				//console.log('get country info', {type: 'node', name: c.name, img: c.flag})
 				res({type: 'node', name: c.name, img: c.flag})
-			}
+			} else { rej('Can\'t find country') }
 		})
 
 	})
 
+}
+
+exports.checkIfFreqDist = function(country) {
+	return new Promise(function(res, rej) {
+		console.log('checkIfFreqDist', country)
+
+		Country.findOne({name: country.name}, function(err, c) {
+			if (err) { rej(err) }
+			if (c) {
+				console.log(country.name+'\'s fd_bg.length is '+c.fd_bg.length)
+				
+				if (c.fd_bg.length > 0) {
+					country['fd_bg'] = true
+				} else { 
+					country['fd_bg'] = false
+				}
+			}
+			res(country)
+		})
+	})
 }
 
 exports.checkIfCrawledAlready = function(countryList) {
@@ -78,7 +98,7 @@ exports.checkIfCrawledAlready = function(countryList) {
 		ret = {c: [], nc: []}
 	
 		countryList.forEach(function(country, i, arr) {
-			console.log('checkIfCrawledAlready ', country, i)
+			console.log('checkIfCrawledAlready', country, i)
 			Country.findOne({name: country}, function(err, c) {
 				if (err) { rej(err) }
 				if (c) {
@@ -95,6 +115,80 @@ exports.checkIfCrawledAlready = function(countryList) {
 
 }
 
+exports.checkIfLink = function(country, otherCountry) {
+
+	return new Promise(function(res, rej) {
+		
+		console.log("checkIfLink", country, otherCountry)
+		_checkIfLink(country, otherCountry)
+			.then(function(AB) {
+				console.log('AB', AB)
+				if (AB.err) Promise.reject(AB.err)
+				if (!AB.ret) {
+					console.log('!AB.ret')
+					return _checkIfLink(otherCountry, country)
+				} else {
+					return Promise.resolve({err: null, ret:AB.ret})
+				}
+			})
+			.then(function(BA) {
+				console.log('BA', BA)
+				if (BA.err) Promise.reject(BA.err)
+				if (!BA.ret) { 
+					console.log('!BA.ret')
+					res(null) 
+				} else {
+					res({ type: "link", source: country, target: otherCountry, "dist" : BA.ret }) 
+				}
+			})
+			.catch(function(e) {
+				rej(e)
+			})
+
+	})
+}
+
+/*
+checkIfLink('Japan', 'Japan')
+	.then(function(c) {
+		console.log('test checkIfLink', c)
+	})
+	.catch(function(e) {
+		console.log('test checkIfLink err', e)
+	})
+*/
+function _checkIfLink(country, otherCountry) {
+	console.log('_checkIfLink', country, otherCountry)
+	return new Promise(function(res, rej) {
+		Country.findOne({name: country}, function(err, c) {
+				if (err) { res({ err: err, ret: null}) }
+				if (c) {
+					//console.log(country, '\'s edges:', c.edges)
+					var foundEdge = findEdge(otherCountry, c.edges)
+					if (foundEdge) {
+						console.log('_checkIfLink found edge', { type: "link", source: country, target: otherCountry, "dist" : foundEdge})
+						res({ err: null, ret: foundEdge })
+					} else {
+						console.log('_checkIfLink !foundEdge)', { err: null, ret: null }) 
+						res({ err: null, ret: null })
+					}
+				} else {
+					console.log('_checkIfLink !c', { err: null, ret: null }) 
+					res({ err: null, ret: null })
+				}
+		})
+	})
+}
+
+function findEdge(c, edges) {
+	console.log('findEdge', c, edges)
+	for (i in edges) { 
+		if (c === edges[i].country && !isNaN(edges[i].dist)) {
+			return edges[i].dist
+		}
+	}
+	return false
+}
 
 exports.update_country = function (cond, update, callback) {
 
