@@ -5,9 +5,13 @@ install:
  - pip install -r ./utils/py_modules/requirements.txt
 services:
  - mongodb
+env:
+ global:
+  - py_env=test
+  - NODE_ENV=test
 before_script:
  - npm install
  - sleep 15
 script:
- - export py_env=test && NODE_ENV=test DEBUG=countrygraph mocha test && unset py_env
+ - mocha test
 
