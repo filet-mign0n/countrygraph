@@ -1,8 +1,6 @@
-import os, re, sys, json, codecs, time, datetime, nltk
+import os, re, sys, json, nltk
 from pymongo import MongoClient 
-from collections import Counter 
 from nltk import word_tokenize
-from nltk.corpus import stopwords
 from nltk.util import ngrams
 
 if 'py_env' in os.environ:

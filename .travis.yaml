@@ -1,7 +1,13 @@
-language: node_js
-node_js:
-	- "5.8"
-
+language: python
+python:
+	- "2.7"
+install:
+	- pip install -r ./utils/py_modules/requirements.txt
+services:
+	- mongodb
 before_script:
-  - npm install -g gulp
-script: gulp
+	- npm install
+	- sleep 15
+script:
+	- export py_env=test && NODE_ENV=test DEBUG=countrygraph mocha test && unset py_env
+
