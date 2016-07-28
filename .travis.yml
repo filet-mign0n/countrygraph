@@ -1,8 +1,10 @@
+# node installed by default, only need to declare python, allows multiple languages
 language: python
 python:
  - "2.7"
 install:
  - pip install -r ./utils/py_modules/requirements.txt
+ - npm install
 services:
  - mongodb
 env:
@@ -11,8 +13,7 @@ env:
   - NODE_ENV=test
 before_script:
  - python -m nltk.downloader maxent_treebank_pos_tagger
- - npm install
- - sleep 15
+ - sleep 15 # inject an artificial wait before making the first mongodb connection
 script:
  - DEBUG=countrygraph mocha test
 
