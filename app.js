@@ -18,14 +18,14 @@ if(!module.parent) {
    	var server = app.listen(app.get('port'), function() {
    	        console.log('Express server listening on PORT ' + app.get('port'));
    	});
-   	require('./crawl_server')(server)
+   	require('./utils/crawl_server')(server)
 }
 
 module.exports = function() {
 	var server = app.listen(app.get('port'), function() {
 	        console.log('Express server listening on PORT ' + app.get('port'));
 	});
-	require('./crawl_server')(server)
+	require('./utils/crawl_server')(server)
 
 	return server
 }

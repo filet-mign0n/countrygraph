@@ -8,7 +8,7 @@ module.exports.py_freqDist = function(country) {
     
     debug('freqDist.py '+country.name)
     
-    cp('python ./py_modules/freqDist.py "'+country.name+'"', 
+    cp('python '+__dirname+'/py_modules/freqDist.py "'+country.name+'"', 
       
       function(error, stdout, stderr) {
         
@@ -36,7 +36,7 @@ module.exports.py_compare_freqDist = function(country, otherCountry) {
   return new Promise(function(resolve, reject) {
     
     debug('compare_freqDist.py '+country+' & '+otherCountry)
-    cp('python ./py_modules/compare_freqDist.py "'+country+'" "'+otherCountry+'"', 
+    cp('python '+__dirname+'/py_modules/compare_freqDist.py "'+country+'" "'+otherCountry+'"', 
       
       function(error, stdout, stderr) {
         

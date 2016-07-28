@@ -10,7 +10,7 @@ if 'py_env' in os.environ:
 else:
 	configFile = 'default'
 
-with open('config/' + configFile + '.json') as config_file:
+with open('./config/' + configFile + '.json') as config_file:
 	config = json.load(config_file)
 
 conn = MongoClient(config['mongo']['host'], config['mongo']['port'])
