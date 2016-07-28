@@ -1,11 +1,16 @@
-import re, sys, json, codecs, time, datetime, nltk
+import os, re, sys, json, codecs, time, datetime, nltk
 from pymongo import MongoClient 
 from collections import Counter 
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 from nltk.util import ngrams
 
-with open('config/default.json') as config_file:
+if 'py_env' in os.environ:
+	configFile = os.environ['py_env']
+else:
+	configFile = 'default'
+
+with open('config/' + configFile + '.json') as config_file:
 	config = json.load(config_file)
 
 conn = MongoClient(config['mongo']['host'], config['mongo']['port'])
@@ -47,6 +52,7 @@ def compare(country, otherCountry):
 
 	#ret = '{ "type": "link", "source": "%s", "target": "%s", "dist" : "%s"}' % (country, otherCountry, bg_dist)
 	#print json.dumps(ret)
+	#print bg_common
 	print bg_dist
 
 compare(country, otherCountry)

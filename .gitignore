@@ -4,6 +4,7 @@
 *.pyc
 .npm
 .grunt
+sample_list.txt
 node_modules
 npm-debug.log*
 test.js

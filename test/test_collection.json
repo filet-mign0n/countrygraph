@@ -1,0 +1,76 @@
+[{
+	"__v": 0,
+	"_id": {
+		"$oid": "57993a8272511155bb9d5b19"
+	},
+	"create_date": {
+		"$date": "2016-07-27T22:49:38.242Z"
+	},
+	"edges": [
+		{
+			"country": "Finland",
+			"dist": 4
+		},
+		{
+			"country": "Norway",
+			"dist": 7
+		}
+	],
+	"fd_bg": [],
+	"fd_uno": [],
+	"flag": "upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/125px-Flag_of_Japan.svg.png",
+	"h2": [],
+	"name": "Japan",
+	"url": "https://en.wikipedia.org/wiki/Japan"
+},
+{
+	"__v": 0,
+	"_id": {
+		"$oid": "57993a8672511155bb9d5b1a"
+	},
+	"create_date": {
+		"$date": "2016-07-27T22:49:42.795Z"
+	},
+	"edges": [
+		{
+			"country": "Japan",
+			"dist": 4
+		},
+		{
+			"country": "Norway",
+			"dist": 28
+		}
+	],
+	"fd_bg": [],
+	"fd_uno": [],
+	"flag": "upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Flag_of_Finland.svg/125px-Flag_of_Finland.svg.png",
+	"h2": [],
+	"name": "Finland",
+	"url": "https://en.wikipedia.org/wiki/Finland"
+},
+{
+	"__v": 0,
+	"_id": {
+		"$oid": "57993a8b72511155bb9d5b1b"
+	},
+	"create_date": {
+		"$date": "2016-07-27T22:49:47.204Z"
+	},
+	"edges": [
+		{
+			"country": "Japan",
+			"dist": 7
+		},
+		{
+			"country": "Finland",
+			"dist": 28
+		}
+	],
+	"fd_bg": [],
+	"fd_uno": [],
+	"flag": "upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Flag_of_Norway.svg/125px-Flag_of_Norway.svg.png",
+	"h2": [],
+	"name": "Norway",
+	"url": "https://en.wikipedia.org/wiki/Norway"
+}]
+

@@ -1,8 +1,0 @@
-{
-	"mongo": {
-		"host": "localhost",
-		"port": 27017,
-		"db": "world" 
-	},
-	"country_list": ["Norway", "Finland"], "Sweden", "Denmark", "China", "Japan", "Taiwan", "Hong Kong (China)", "South Korea", "Argentina", "Chile", "Venezuela", "Ecuador", "Bolivia", "Colombia", "Vatican City"]
-}

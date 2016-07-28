@@ -1,3 +1,4 @@
+const debug = require('debug')('countrygraph')  
 var Promise = require('bluebird');
 var cp = require('child_process').exec
 
@@ -5,9 +6,9 @@ module.exports.py_freqDist = function(country) {
   
   return new Promise(function(resolve, reject) {
     
-    console.log('\nfreqDist.py '+country.name+'\n')
+    debug('freqDist.py '+country.name)
     
-    cp('python ./freqDist.py "'+country.name+'"', 
+    cp('python ./py_modules/freqDist.py "'+country.name+'"', 
       
       function(error, stdout, stderr) {
         
@@ -16,12 +17,12 @@ module.exports.py_freqDist = function(country) {
         
         if (stdout =='nada\n' || stdout == '' || stdout == undefined) { 
           
-          console.log('freqDist.py returned no stdout');
+          debug('freqDist.py returned no stdout');
           resolve(country)
         
         } else {
 
-          console.log('freqDist.py done, with stdout:', stdout)
+          debug('freqDist.py done, with stdout:', stdout.substring(0, stdout.length - 1));
           resolve(country)
         
         }
@@ -34,8 +35,8 @@ module.exports.py_compare_freqDist = function(country, otherCountry) {
   
   return new Promise(function(resolve, reject) {
     
-    console.log('compare_freqDist.py '+country+' & '+otherCountry)
-    cp('python ./compare_freqDist.py "'+country+'" "'+otherCountry+'"', 
+    debug('compare_freqDist.py '+country+' & '+otherCountry)
+    cp('python ./py_modules/compare_freqDist.py "'+country+'" "'+otherCountry+'"', 
       
       function(error, stdout, stderr) {
         
@@ -43,10 +44,10 @@ module.exports.py_compare_freqDist = function(country, otherCountry) {
         if (stderr) { reject(stderr) }
         
         if (stdout == '' || stdout == undefined) { 
-          console.log('no stdout');
+          debug('compare_freqDist.py between', country, otherCountry, 'no stdout');
           resolve(country)
         } else {
-          console.log('compare_freqDist.py between', country, otherCountry, 'done, with bg_dist', stdout, stderr)
+          debug('compare_freqDist.py between', country, otherCountry, 'done, with bg_dist', stdout.substring(0, stdout.length - 1));
           if (!isNaN(parseInt(stdout))) {
             resolve({ type: "link", source: country, target: otherCountry, dist: parseInt(stdout) })
           } else { resolve(country) }
