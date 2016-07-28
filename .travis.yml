@@ -10,6 +10,7 @@ env:
   - py_env=test
   - NODE_ENV=test
 before_script:
+ - python -m nltk.downloader maxent_treebank_pos_tagger
  - npm install
  - sleep 15
 script:
