@@ -7,8 +7,9 @@ var server = require('../app')();
 var c; //test client
 
 /* Arguably a long testing timeout, but consider there is web  
-crawling and frequency distribution calculation involved */
-const test_timeout = 60000;
+crawling and frequency distribution calculation involved, 
+all of this on a Travis CI container with low bandwidth and CPU */
+const test_timeout = 5*60000;
 
 describe('WebSocket Client', function() {
 
