@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "export py_env=test && NODE_ENV=test DEBUG=countrygraph mocha test && unset py_env"
+    "test": "py_env=test NODE_ENV=test DEBUG=countrygraph mocha test"
   },
   "author": "Filet Mign0n",
   "license": "MIT",

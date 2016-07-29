@@ -2,18 +2,29 @@
 <head>
 	<title>CountryGraph</title>
 	<link rel="stylesheet" href="/stylesheets/graph.css">
-	<script src="http://d3js.org/d3.v3.min.js"></script>
-	<script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
-	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-	<script src="/js/graph.js"></script>
+	<link href="/dist/jqvmap.css" media="screen" rel="stylesheet" type="text/css"/>
+	<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+	<script type="text/javascript" src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script type="text/javascript" src="/dist/jquery.vmap.js"></script>
+	<script type="text/javascript" src="/dist/maps/jquery.vmap.world.js" charset="utf-8"></script>
+	<script type="text/javascript" src="/js/graph.js"></script>
 </head>
 <body>
-	<div id="countries">
-		<form>
-			<input type="text" id="query" name="query" value="Norway, Finland, Japan">
-			<input type="button" id="button" value="submit">
-		</form>	
+	<div class="modal">
+		<!-- Modal content -->
+		<div id="vmap" class="vmap"></div>
 	</div>
-	<div id="graph"></div>
+	
+	<div class="countrygraph">
+		<div id="countries">
+			<form>
+				<input type="text" id="query" name="query" value="Norway, Finland, Japan">
+				<input type="button" id="button" value="submit">
+			</form>	
+		</div>
+		
+		<div id="graph"></div>
+	</div>
 </body>
 </html>

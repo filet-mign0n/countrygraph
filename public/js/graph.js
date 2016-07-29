@@ -8,6 +8,17 @@ $(document).ready(function() {
     var graph = new myGraph("#graph")
     ws('ws://localhost:8000')
 
+    $('#vmap').vectorMap(
+    {
+        map: 'world_en',
+        showTooltip: true,
+        enableZoom: true,
+        multiSelectRegion: true,
+        onRegionClick: function(e, c, r) {
+            console.log(r)
+        }
+    });
+
     $('#button').click(function() {
         graph.reset()
         click($('#query').val())
