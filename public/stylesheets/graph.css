@@ -1,3 +1,8 @@
+html, body { 
+	margin:0; 
+	padding:0; 
+	background-color: #a5bfdd 
+}
 .modal {
     position: fixed;
     z-index: 1;
@@ -5,48 +10,71 @@
     top: 0%;
     width:  100%; 
     height: 100%; 
-    background-color: rgb(0,0,0); 
-    background-color: rgba(0,0,0,0.4); 
 }
 
 .vmap {
 	position: absolute;
-    width: 800px; 
-    height: 500px;
-    left: 50%;
-    top: 50%;
-    margin: -250px 0 0px -400px;
+    width: 100%; 
+    height: 100%;
+    left: 0%;
+    top: 0%;
 }
 
 .selection {
-	display: none;
-	/*display: inline-block;*/
-	text-align: center;
-	line-height: 5px;
-	font-size: 1em;
-	color: yellow;
+	/*min-height: 200px;*/
 	position: absolute;
-	width: 400px;
-	height: 200px;
-	border-radius: 15px;
-	background-color: brown;
-	margin: -100px 0 0 -200px;
-	left: 50%;
-	top: 50%;
-}
-
-#countries {
-	position: relative;
-	text-align:center;
-}
-#graph {
-	position: relative;
+	box-shadow: 0 5px #27496d;
+	display: inline-block;
 	text-align: center;
+	font-family: 'Open Sans', sans-serif; 
+	font-weight: 300; 
+	text-shadow: 2px 2px 8px yellow;
+	line-height: 5px;
+	font-size: .8em;
+	color: white;
+	width: 200px;
+	border-radius: 15px;
+	background-color: rgb(0,0,0); 
+	background-color: rgba(0,0,0,0.6); 
+	margin: 0px 0 0 -100px;
+	right: 0%;
+	top: 0%;
 }
 
-#restart {
-	border: solid 1px #fff;
-	margin:1;
-	padding:4.5;
-	font-size: 100%;
+#selecTitle {
+	text-align: center;
+	font-family: 'Open Sans', sans-serif; 
+	font-weight: 300; 
+	text-shadow: 2px 2px 8px red;
+	line-height: 5px;
+	font-size: 1.3em;
+	color: orange;
+}
+
+button.selecBtn {
+	font-size: 1em;
+	color: #fff;
+	padding: 4px 6px;
+	background-color: #417cb8;
+	outline: none;
+	border: none;
+	border-radius: 15px;
+	box-shadow: 0 3px #27496d;
+}
+
+button.selecBtn:hover,
+button.selecBtn.hover {
+	background-color: #6496c8; 
+}
+
+button.selecBtn:active,
+button.selecBtn.active {
+	border: none;
+	background-color: #417cb8;
+	box-shadow: 0 5px #27496d;
+	transform: translateY(4px);
+}
+
+#graph {
+	position: absolute;
 }

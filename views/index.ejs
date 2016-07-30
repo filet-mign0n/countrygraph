@@ -14,15 +14,11 @@
 	<div class="modal">
 		<div id="vmap" class="vmap"></div>
 		<div class="selection">
-			<p> Your selection: </p>
-			<button onclick="emit()">Graph 'em!</button>
+			<p id="selecTitle">Your selection:</p>
+			<button class="selecBtn" id="emitButton" onclick="emit()">Graph 'em!</button>
+			<button class="selecBtn" id="reset" onclick="restart()">Reset</button>	
 		</div>
-
 	</div>
-	
-	<div class="countrygraph">
-		<button id="restart" onclick="restart()">Restart</button>		
-		<div id="graph"></div>
-	</div>
+	<div class="countrygraph" id="graph"></div>
 </body>
 </html>

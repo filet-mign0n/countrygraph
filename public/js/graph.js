@@ -1,4 +1,4 @@
-const max_countries = 5;
+const max_countries = 25;
 var selected = [];
 var socket;
 var graph;
@@ -9,8 +9,7 @@ var r = 30;
 
 $(document).ready(function() {
 
-    graph = new myGraph("#graph")
-    ws('ws://localhost:8000')
+    ws('ws://localhost:8000');
 
     map = $('#vmap').vectorMap(
     {
@@ -18,13 +17,34 @@ $(document).ready(function() {
         showTooltip: true,
         enableZoom: true,
         multiSelectRegion: true,
-        onRegionClick: function(e, c, r) {
-            console.log('clicked on', r)
-            prepQuery(r)
-        }
+        onRegionClick: mapClickHandler,
     });
 
-})
+    graph = new myGraph("#graph");
+
+});
+
+function mapClickHandler(e, cc, r) {
+            console.log('clicked on', cc, r)
+            switch(cc) {
+                case "ru":
+                    r = "Russia"
+                    break;
+                case "us":
+                    r = "United States"
+                    break;
+                case "cd":
+                    r = "Democratic Republic of the Congo"
+                    break;
+                case "cg":
+                    r = "Republic of the Congo"
+                    break;
+                case "la":
+                    r = "Laos"
+                    break;
+            }
+            prepQuery(r, cc)
+}
 
 // needed for when user restarts
 JQVMap.prototype.deselectAll = function() {
@@ -37,43 +57,41 @@ JQVMap.prototype.deselectAll = function() {
   };
 };
 
-function prepQuery(c) {
+function prepQuery(c, cc) {
     for (i in selected) {
         if (selected[i] === c) {
             selected.splice(i, 1)
+            $("#"+cc).remove()
             return
         } 
     }
     selected.push(c)
-
-    if (selected.length >= 5) promptSelection()
+    $("<p class=\"ccp\" id=\""+cc+"\">"+c+"</p>").insertBefore("#emitButton")
+    if (selected.length >= max_countries) promptSelection()
 }
 
 function promptSelection() {
-    $('#vmap').css("pointer-events", "none");
-    $(".selection").show()
+    //$('#vmap').css("pointer-events", "none");
+    $(".selection").css("display", "inline-block")
 }
 
 function emit(input_value) {
-    $(".modal").hide()
-    $(".selection").hide()
+    $("#vmap").hide(500)
     socket.emit('c', selected)
     console.log("socket.emit('c', ", selected)
 }
 
 function restart() {
     map.deselectAll()
-    $('#vmap').css("pointer-events", "auto");
     selected.length = 0
     graph.reset()
-    $(".modal").show()
+    $(".ccp").fadeOut(150, function() { $(this).remove(); })
+    $("#vmap").show(700)
 }
 
 function ws(ws_url) {
     console.log('ws started')
     socket = io.connect(ws_url)
-
-    //socket.emit('c', countries)
 
     socket.on('crawl', function(data) {
 
@@ -237,7 +255,6 @@ function myGraph(el) {
 }
 
 $(window).resize(function() {
-    console.log('WINDOW RESIZE!')
     new_w = $(window).width()-30
     new_h = $(window).height()-90
 
