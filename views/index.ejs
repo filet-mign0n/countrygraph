@@ -12,18 +12,16 @@
 </head>
 <body>
 	<div class="modal">
-		<!-- Modal content -->
 		<div id="vmap" class="vmap"></div>
+		<div class="selection">
+			<p> Your selection: </p>
+			<button onclick="emit()">Graph 'em!</button>
+		</div>
+
 	</div>
 	
 	<div class="countrygraph">
-		<div id="countries">
-			<form>
-				<input type="text" id="query" name="query" value="Norway, Finland, Japan">
-				<input type="button" id="button" value="submit">
-			</form>	
-		</div>
-		
+		<button id="restart" onclick="restart()">Restart</button>		
 		<div id="graph"></div>
 	</div>
 </body>
