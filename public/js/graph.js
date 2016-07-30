@@ -1,5 +1,6 @@
-const max_countries = 25;
+const max_countries = 5;
 var selected = [];
+var emitted = false;
 var socket;
 var graph;
 var map;
@@ -71,20 +72,31 @@ function prepQuery(c, cc) {
 }
 
 function promptSelection() {
-    //$('#vmap').css("pointer-events", "none");
-    $(".selection").css("display", "inline-block")
+    $('#vmap').css("pointer-events", "none");
+    alert('reached max number of countries')
 }
 
 function emit(input_value) {
-    $("#vmap").hide(500)
-    socket.emit('c', selected)
-    console.log("socket.emit('c', ", selected)
+    if (emitted) {
+        alert('already emitted query, click reset to start over')
+        return
+    }
+    if (selected.length <= 1) { 
+        alert('click on a least 2 countries')
+        return
+    }
+    emitted = true;
+    $("#vmap").hide(500);
+    socket.emit('c', selected);
+    console.log("socket.emit('c', ", selected);
 }
 
 function restart() {
-    map.deselectAll()
-    selected.length = 0
-    graph.reset()
+    emitted = false;
+    map.deselectAll();
+    selected.length = 0;
+    graph.reset();
+    $('#vmap').css("pointer-events", "auto");
     $(".ccp").fadeOut(150, function() { $(this).remove(); })
     $("#vmap").show(700)
 }
