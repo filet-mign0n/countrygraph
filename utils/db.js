@@ -107,10 +107,12 @@ exports.checkIfCrawledAlready = function(countryList) {
 			debug('checkIfCrawledAlready', country, i)
 			Country.findOne({name: country}, function(err, c) {
 				if (err) { rej(err) }
-				if (c) {
-					if (c.h2[0].p.length > 0)  {
-						debug('checkIfCrawledAlready c.h2[0].p.length > 0')
-						ret.c.push(country)	
+				if (c && c != 'undefined') {
+					if (c.h2[0] && c.h2[0] != 'undefined') {
+						if (c.h2[0].p.length > 0)  {
+							debug('checkIfCrawledAlready c.h2[0].p.length > 0')
+							ret.c.push(country)	
+						} else { ret.nc.push(country) }
 					} else { ret.nc.push(country) }
 				} else { ret.nc.push(country) }
 
@@ -154,15 +156,6 @@ exports.checkIfLink = function(country, otherCountry) {
 	})
 }
 
-/*
-checkIfLink('Japan', 'Japan')
-	.then(function(c) {
-		debug('test checkIfLink', c)
-	})
-	.catch(function(e) {
-		debug('test checkIfLink err', e)
-	})
-*/
 function _checkIfLink(country, otherCountry) {
 	debug('_checkIfLink', country, otherCountry)
 	return new Promise(function(res, rej) {

@@ -43,7 +43,7 @@ module.exports.py_compare_freqDist = function(country, otherCountry) {
         if (error) { reject(error) }
         if (stderr) { reject(stderr) }
         
-        if (stdout == '' || stdout == undefined) { 
+        if (stdout =='nada\n' || stdout == '' || stdout == undefined) { 
           debug('compare_freqDist.py between', country, otherCountry, 'no stdout');
           resolve(country)
         } else {

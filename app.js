@@ -4,7 +4,7 @@ var express = require('express');
 var router = express.Router();
 var app = express();
 var args = process.argv.slice(2);
-var port = process.env.PORT || (process.argv[2] || 8000);
+var port = process.env.PORT || (parseInt(process.argv[2]) || 8000);
 port = (typeof port === "number") ? port : 8000;
 
 app.set('port', port);

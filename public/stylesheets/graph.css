@@ -1,8 +1,9 @@
 html, body { 
 	margin:0; 
 	padding:0; 
-	background-color: #a5bfdd 
+	background-color: #a5bfdd;
 }
+
 .modal {
     position: fixed;
     z-index: 1;

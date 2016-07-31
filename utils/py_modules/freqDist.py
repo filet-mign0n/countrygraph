@@ -44,8 +44,15 @@ def freqDist(txt):
 		print "nada"
 
 q = db.countries.find_one({"name": name})
-freqDist(q.get('h2')[0].get('p'))
 
+try:
+	q.get('h2')[0].get('p')
+except:
+	print "nada"
+else:
+	freqDist(q.get('h2')[0].get('p'))
+
+#print name, config['mongo']['host'], config['mongo']['port'], config['mongo']['db'],  q.get('h2')
 
 
 

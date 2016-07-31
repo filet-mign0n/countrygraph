@@ -1,4 +1,4 @@
-const max_countries = 5;
+const max_countries = 10;
 var selected = [];
 var emitted = false;
 var socket;
@@ -10,7 +10,7 @@ var r = 30;
 
 $(document).ready(function() {
 
-    ws('ws://localhost:8000');
+    ws('ws://' + window.location.host);
 
     map = $('#vmap').vectorMap(
     {
@@ -26,25 +26,25 @@ $(document).ready(function() {
 });
 
 function mapClickHandler(e, cc, r) {
-            console.log('clicked on', cc, r)
-            switch(cc) {
-                case "ru":
-                    r = "Russia"
-                    break;
-                case "us":
-                    r = "United States"
-                    break;
-                case "cd":
-                    r = "Democratic Republic of the Congo"
-                    break;
-                case "cg":
-                    r = "Republic of the Congo"
-                    break;
-                case "la":
-                    r = "Laos"
-                    break;
-            }
-            prepQuery(r, cc)
+    console.log('clicked on', cc, r)
+    switch(cc) {
+        case "ru":
+            r = "Russia"
+            break;
+        case "us":
+            r = "United States"
+            break;
+        case "cd":
+            r = "Democratic Republic of the Congo"
+            break;
+        case "cg":
+            r = "Republic of the Congo"
+            break;
+        case "la":
+            r = "Laos"
+            break;
+    }
+    prepQuery(r, cc)
 }
 
 // needed for when user restarts
@@ -57,6 +57,7 @@ JQVMap.prototype.deselectAll = function() {
       self.deselect(selectedCCs[i])
   };
 };
+
 
 function prepQuery(c, cc) {
     for (i in selected) {
@@ -204,7 +205,7 @@ function myGraph(el) {
     var update = function (t) {
 
         var node = l2.selectAll("g.node")
-            .data(nodes)//, function(d) { return d.id;});
+            .data(nodes)
 
         var nodeEnter = node.enter().append("g")
             .attr("class", "node")
@@ -236,8 +237,9 @@ function myGraph(el) {
 
         link.enter().append("line")
             .attr("class", "link")
-            .style("stroke", "#ccc")
-            .style("opacity", 0.7)
+            .style("stroke", "#696969")
+            .style("stroke-width", "2")
+            .style("opacity", 0.5)
 
         link.exit().remove();
 
