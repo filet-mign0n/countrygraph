@@ -147,7 +147,7 @@ function Crawl(socket, countryList) {
                             if (cancelled) { 
                                 r.cancel
                             } else {
-                                
+
                                 r = r
                                     .then(db.create_country(country))
                                     .then(function(country) {
@@ -259,7 +259,10 @@ function compare(socket, country, countries) {
                 .then(function(c) {
                     return new Promise(function(res, rej) {   
                         debug('Compare about to emit', c)
-                        if (!cancelled) socket.emit('crawl', c)
+                        if (!cancelled) {
+                            if (typeof(c) == 'string') c = JSON.parse(c)
+                            socket.emit('crawl', c)
+                        }
                         res()
                     })
                 })

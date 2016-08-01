@@ -12,7 +12,7 @@ mongoose.connect(url, function(err) {
 })
 
 var h2_Schema = new Schema({ title: String, p: String }, { noId: true });
-var edgeList_Schema = new Schema({ country: String, dist: Number }, { noId: true });
+var edgeList_Schema = new Schema({ country: String, dist: Number, bg_common: Array}, { noId: true });
 
 var Country = new Schema({
 	create_date: { type: Date, default: Date.now },
@@ -145,7 +145,7 @@ exports.checkIfLink = function(country, otherCountry) {
 				if (!BA.ret) { 
 					res(null) 
 				} else {
-					res({ type: "link", source: country, target: otherCountry, dist: BA.ret }) 
+					res({ type: "link", source: country, target: otherCountry, dist: BA.ret.dist, bg_common: BA.ret.bg_common }) 
 				}
 			})
 			.catch(function(e) {
@@ -164,7 +164,7 @@ function _checkIfLink(country, otherCountry) {
 					//debug(country, '\'s edges:', c.edges)
 					var foundEdge = findEdge(otherCountry, c.edges)
 					if (foundEdge) {
-						debug('_checkIfLink found edge', { type: "link", source: country, target: otherCountry, "dist" : foundEdge})
+						debug('_checkIfLink found edge', { type: "link", source: country, target: otherCountry, "ret" : foundEdge})
 						res({ err: null, ret: foundEdge })
 					} else {
 						debug('_checkIfLink !foundEdge)', { err: null, ret: null }) 
@@ -182,7 +182,7 @@ function findEdge(c, edges) {
 	debug('findEdge', c, edges)
 	for (i in edges) { 
 		if (c === edges[i].country && !isNaN(edges[i].dist)) {
-			return edges[i].dist
+			return {dist: edges[i].dist, bg_common: edges[i].bg_common}
 		}
 	}
 	return false
