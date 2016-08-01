@@ -5,6 +5,12 @@ var config = require('config')
 var wc = require('./word_counter.js')
 var db = require('./db.js')
 
+// allow cancellation of chain in case user restarts prematurely 
+Promise.config({ cancellation: true });
+cancelled = false
+var r = Promise.resolve() // Promise chain for Crawl and noCrawl chains
+var comp_r = Promise.resolve() // Promise chain for compare chain
+
 const list_countries_url = 'https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area'
 const source_url = 'https://en.wikipedia.org'
 
@@ -17,6 +23,9 @@ module.exports = function(httpServer) {
 		  
             socket.on('c', function(data) {
                 if (Array.isArray(data) && data.length) {
+                    cancelled = false
+                    r = Promise.resolve()
+                    comp_r = Promise.resolve()
                     debug('socket on c', data)
                     emittedCountries.length = 0
 
@@ -32,12 +41,17 @@ module.exports = function(httpServer) {
 
                 }
             })
+
+            socket.on('cancel', function() {
+                debug('client cancelled')
+                cancelled = true
+            })
           
         })
 
 }
 
-var r = Promise.resolve()
+
 var sessionCountries = {}
 
 
@@ -51,12 +65,18 @@ function noCrawl(socket, countryList) {
         debug('noCrawl forEach', name)
         r = r
             .then(function() {
-                return db.getCountryInfo(name) 
+                if (cancelled) { 
+                    debug('Crawl chain cancelled'); 
+                    r.cancel();
+                } else { 
+                    return db.getCountryInfo(name) 
+                }
+                
             })
             .then(function(c) {
                 return new Promise(function(res, rej) { 
                     debug('Crawl: graph node about to be emitted: ', c)
-                    socket.emit('crawl', c)
+                    if (!cancelled) socket.emit('crawl', c)
                     emittedCountries.push(c.name)
                     res( { name: c.name } )
                 })
@@ -122,27 +142,30 @@ function Crawl(socket, countryList) {
                         } else {
                             
                             debug('found '+title+' in wikipedia page to crawl')
-                            country = { name : title,
-                                        url: source_url+$(a).attr('href'),
-                                       }
+                            country = { name: title, url: source_url+$(a).attr('href') }
                             
-                            r = r
-                                .then(db.create_country(country))
-                                .then(function(country) {
-                                    return secondQueue(country, socket)
-                                })
-                                .then(wc.py_freqDist)
-                                .then(function(c) {
-                                    // copy current list of emitted nodes
-                                    var compareArray = emittedCountries.slice()
-                                    // remove current country from list
-                                    compareArray.splice(compareArray.indexOf(c.name), 1)
-                                    debug(c.name+'\'s compareArray', compareArray)
+                            if (cancelled) { 
+                                r.cancel
+                            } else {
+                                
+                                r = r
+                                    .then(db.create_country(country))
+                                    .then(function(country) {
+                                        return secondQueue(country, socket)
+                                    })
+                                    .then(wc.py_freqDist)
+                                    .then(function(c) {
+                                        // copy current list of emitted nodes
+                                        var compareArray = emittedCountries.slice()
+                                        // remove current country from list
+                                        compareArray.splice(compareArray.indexOf(c.name), 1)
+                                        debug(c.name+'\'s compareArray', compareArray)
 
-                                    if (compareArray.length) return compare(socket, c.name, compareArray)            
-                                    else return Promise.resolve()
-                                })
-                                .catch(function(e) { debug("Crawl error",e) })
+                                        if (compareArray.length) return compare(socket, c.name, compareArray)            
+                                        else return Promise.resolve()
+                                    })
+                                    .catch(function(e) { debug("Crawl error",e) })
+                            }
                         }
                 })   
                 return r
@@ -179,7 +202,12 @@ function secondQueue(country, socket) {
                 //emit vertex data, edges will be caclulate at next step
                 var node = {type: 'node', name: country.name, img: country.flag}
                 debug('secondQeue: graph node about to be emitted: ', node)
-                socket.emit('crawl', node)
+                if (!cancelled) { 
+                    socket.emit('crawl', node)
+                } else { 
+                    debug("secondQeue saw cancellation, no socket.emit") 
+                }
+
                 emittedCountries.push(country.name)
 
                 db.update_country(country.name, 
@@ -205,15 +233,19 @@ function secondQueue(country, socket) {
 function compare(socket, country, countries) {
     debug('compare', country, countries)
 
-    r = Promise.resolve()
     return new Promise(function(res, rej) {
 
         countries.forEach(function(otherCountry, i, arr) {
             debug('compare countries forEach', otherCountry)
             
-            r = r
+            comp_r = comp_r
                 .then(function() {
-                    return db.checkIfLink(country, otherCountry)
+                    if (cancelled) {
+                        console.log("compare chain cancelled");
+                        comp_r.cancel();
+                    } else {
+                        return db.checkIfLink(country, otherCountry)
+                    }
                 })
                 .then(function(c) {
                     if (!c) {
@@ -227,7 +259,7 @@ function compare(socket, country, countries) {
                 .then(function(c) {
                     return new Promise(function(res, rej) {   
                         debug('Compare about to emit', c)
-                        socket.emit('crawl', c)
+                        if (!cancelled) socket.emit('crawl', c)
                         res()
                     })
                 })

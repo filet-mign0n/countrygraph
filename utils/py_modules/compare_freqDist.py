@@ -58,8 +58,3 @@ def compare(country, otherCountry):
 		print bg_dist
 
 compare(country, otherCountry)
-
-
-
-
-

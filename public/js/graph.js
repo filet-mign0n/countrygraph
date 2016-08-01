@@ -93,6 +93,7 @@ function emit(input_value) {
 }
 
 function restart() {
+    socket.emit('cancel')
     emitted = false;
     map.deselectAll();
     selected.length = 0;

@@ -43,17 +43,24 @@ def freqDist(txt):
 		db.countries.update_one({"name": name}, {"$set" : { "fd_bg": [] }}) #, "fd_uno": [] }})
 		print "nada"
 
-q = db.countries.find_one({"name": name})
+q = db.countries.find({"name": name})
 
-try:
-	q.get('h2')[0].get('p')
-except:
-	print "nada"
+found = False
+for doc in q:
+	try:
+		doc.get('h2')[0].get('p')
+	except:
+		pass
+	else:
+		found = True
+		txt = doc.get('h2')[0].get('p')
+
+if found:
+	freqDist(txt)
 else:
-	freqDist(q.get('h2')[0].get('p'))
+	print 'nada'
 
 #print name, config['mongo']['host'], config['mongo']['port'], config['mongo']['db'],  q.get('h2')
-
 
 
 

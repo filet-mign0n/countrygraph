@@ -57,12 +57,11 @@ exports.create_country = function(country) {
 		}
 }
 
-exports.getCountryInfo = function(title) {
-	
+exports.getCountryInfo = function(title) {	
 	return new Promise(function(res, rej) { 
 	
 		Country.findOne({name: title}, function(err, c) {
-			debug('getCountryInfo', c.name, c.flag.slice(-20))
+			debug('getCountryInfo', c.name, c.flag)
 
 			if (err) { rej(err) }
 			if (c) {
@@ -108,11 +107,15 @@ exports.checkIfCrawledAlready = function(countryList) {
 			Country.findOne({name: country}, function(err, c) {
 				if (err) { rej(err) }
 				if (c && c != 'undefined') {
-					if (c.h2[0] && c.h2[0] != 'undefined') {
-						if (c.h2[0].p.length > 0)  {
-							debug('checkIfCrawledAlready c.h2[0].p.length > 0')
-							ret.c.push(country)	
-						} else { ret.nc.push(country) }
+					//if (c.h2[0] && c.h2[0] != 'undefined') {
+					//	if (c.h2[0].p.length > 0)  {
+					if (c.name && c.name!='undefined' 
+						&& c.url && c.url!='undefined' 
+						&& c.flag && c.flag!='undefined') {
+							if (c.name.length>0 && c.url.length>0 && c.flag.length>0) {
+								debug('checkIfCrawledAlready c.h2[0].p.length > 0')
+								ret.c.push(country)	
+							} else { ret.nc.push(country) }
 					} else { ret.nc.push(country) }
 				} else { ret.nc.push(country) }
 
@@ -130,20 +133,16 @@ exports.checkIfLink = function(country, otherCountry) {
 		debug("checkIfLink", country, otherCountry)
 		_checkIfLink(country, otherCountry)
 			.then(function(AB) {
-				debug('AB', AB)
 				if (AB.err) Promise.reject(AB.err)
 				if (!AB.ret) {
-					debug('!AB.ret')
 					return _checkIfLink(otherCountry, country)
 				} else {
 					return Promise.resolve({err: null, ret:AB.ret})
 				}
 			})
 			.then(function(BA) {
-				debug('BA', BA)
 				if (BA.err) Promise.reject(BA.err)
 				if (!BA.ret) { 
-					debug('!BA.ret')
 					res(null) 
 				} else {
 					res({ type: "link", source: country, target: otherCountry, dist: BA.ret }) 
