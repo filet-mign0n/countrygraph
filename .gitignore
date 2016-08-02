@@ -8,3 +8,4 @@ sample_list.txt
 node_modules
 npm-debug.log*
 promise_test.js
+.DS_Store 
