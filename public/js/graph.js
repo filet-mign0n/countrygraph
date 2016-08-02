@@ -1,16 +1,18 @@
-const max_countries = 10;
+const max_countries = 100;
+var linkCount = 0;
 var selected = [];
 var emitted = false;
 var socket;
 var graph;
 var map;
-var w = $(window).width()-30;
-var h = $(window).height()-90;
+var w = $(window).width();
+var h = $(window).height();
 var r = 30;
 
 $(document).ready(function() {
 
     ws('ws://' + window.location.host);
+    graph = new myGraph("#graph");
 
     map = $('#vmap').vectorMap(
     {
@@ -21,9 +23,17 @@ $(document).ready(function() {
         onRegionClick: mapClickHandler,
     });
 
-    graph = new myGraph("#graph");
-
 });
+
+function highlightLink(t) {
+    t.css("stroke-width", "10")
+    t.css("stroke", "red")
+}
+
+function unHighlightLink(t) {
+    t.css("stroke-width", "2")
+    t.css("stroke", "#696969")
+}
 
 function mapClickHandler(e, cc, r) {
     console.log('clicked on', cc, r)
@@ -58,7 +68,6 @@ JQVMap.prototype.deselectAll = function() {
   };
 };
 
-
 function prepQuery(c, cc) {
     for (i in selected) {
         if (selected[i] === c) {
@@ -88,6 +97,8 @@ function emit(input_value) {
     }
     emitted = true;
     $("#vmap").hide(500);
+    $("#graph").css("z-index", "2")
+    $(".selection").css("z-index", "2")
     socket.emit('c', selected);
     console.log("socket.emit('c', ", selected);
 }
@@ -100,7 +111,10 @@ function restart() {
     graph.reset();
     $('#vmap').css("pointer-events", "auto");
     $(".ccp").fadeOut(150, function() { $(this).remove(); })
+    $("#graph").css("z-index", "1")
+    $(".selection").css("z-index", "1")
     $("#vmap").show(700)
+
 }
 
 function ws(ws_url) {
@@ -115,10 +129,13 @@ function ws(ws_url) {
             graph.addNode(data.name, data.img)
         } 
         else if (data.type == 'link') {
-            if (data.dist > 1)
-                var dist = (1/data.dist)*1400
-                //var dist = parsed_data.dist >= 5 ? (1/parsed_data.dist)*1400 : 100
-                graph.addLink(data.source, data.target, dist)
+            if (data.dist > 1) {
+                //var dist = (1/data.dist)*1400
+                //var dist = data.dist >= 5 ? (1/data.dist)*1400 : 100
+                var dist = data.dist > 6 ? w * 3 * (1/data.dist) : w * 3 * .16
+                if (!Array.isArray(data.bg_common)) bg_common = []
+                graph.addLink(data.source, data.target, dist, data.bg_common)
+            }
         }
         else {console.log('\nweird crawl packet received :-/')}
 
@@ -131,7 +148,7 @@ function ws(ws_url) {
 } 
 
 function myGraph(el) {
-    
+
     this.addNode = function (id, img) {
         nodes.push({"id":id, "img": img});
         update();
@@ -151,7 +168,7 @@ function myGraph(el) {
         }
     }
 
-    this.addLink = function (sourceId, targetId, dist) {
+    this.addLink = function (sourceId, targetId, dist, bg_common) {
         var sourceNode = findNode(sourceId);
         var targetNode = findNode(targetId);
         var dist = parseInt(dist)
@@ -159,8 +176,12 @@ function myGraph(el) {
         console.log('this.addLink with args :\n'+sourceId+' '+targetId+' '+dist)
         if((sourceNode !== undefined) && (targetNode !== undefined) && dist > 0) {
         	console.log('pushing links')
-            links.push({"source": sourceNode, "target": targetNode, "dist": dist});
+            links.push({"source": sourceNode, "target": targetNode, "dist": dist, "bg_common": bg_common, "linkCount": linkCount});
             update();
+            $("line#"+linkCount).click(function() { alert($(this).attr('title')) })
+            $("line#"+linkCount).mouseover(function() { highlightLink($(this)) })
+            $("line#"+linkCount).mouseout(function() { unHighlightLink($(this)) })
+            linkCount++
         }
     }
 
@@ -213,6 +234,7 @@ function myGraph(el) {
             .call(force.drag);
 
         nodeEnter.append('circle')
+            .attr("id", function(d) {return d.id})
             .attr("cx", "0px")
             .attr("cy", "0px")
         	.attr("r", 27)
@@ -229,6 +251,7 @@ function myGraph(el) {
             .attr("class", "nodetext")
             .attr("dy", "15")
             .attr("text-anchor", "middle")
+            .attr("title", function(d) {return d.id})
             .text(function(d) {return d.id});
 
         node.exit().remove();
@@ -238,6 +261,9 @@ function myGraph(el) {
 
         link.enter().append("line")
             .attr("class", "link")
+            .attr("id", function(d) { return d.linkCount })
+            .attr("title", function(d) { return d.bg_common})
+            .attr("cursor", "pointer")
             .style("stroke", "#696969")
             .style("stroke-width", "2")
             .style("opacity", 0.5)
@@ -263,15 +289,16 @@ function myGraph(el) {
         force.start();
         // Keep alive
         force.on("end", function() { force.alpha(0.01)});
+
     }
 
     update(this);
-    
+
 }
 
 $(window).resize(function() {
-    new_w = $(window).width()-30
-    new_h = $(window).height()-90
+    new_w = $(window).width()
+    new_h = $(window).height()
 
     graph.vis
         .attr('height', new_h) 

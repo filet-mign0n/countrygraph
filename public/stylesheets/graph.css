@@ -23,6 +23,7 @@ html, body {
 
 .selection {
 	/*min-height: 200px;*/
+	z-index: 1;
 	position: absolute;
 	box-shadow: 0 5px #27496d;
 	display: inline-block;
@@ -77,5 +78,6 @@ button.selecBtn.active {
 }
 
 #graph {
-	position: relative;
+	z-index: 1;
+	position: absolute;
 }
