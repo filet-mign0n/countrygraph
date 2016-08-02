@@ -1,4 +1,4 @@
-const max_countries = 100;
+const max_countries = 12;
 var linkCount = 0;
 var selected = [];
 var emitted = false;
