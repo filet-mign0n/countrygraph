@@ -97,6 +97,8 @@ function emit(input_value) {
     }
     emitted = true;
     $("#vmap").hide(500);
+    $(".mapinfo").hide()
+    $(".graphinfo").show()
     $("#graph").css("z-index", "2")
     $(".selection").css("z-index", "2")
     socket.emit('c', selected);
@@ -114,6 +116,8 @@ function restart() {
     $("#graph").css("z-index", "1")
     $(".selection").css("z-index", "1")
     $("#vmap").show(700)
+    $(".mapinfo").show(700)
+    $(".graphinfo").hide()
 
 }
 
@@ -132,7 +136,7 @@ function ws(ws_url) {
             if (data.dist > 1) {
                 //var dist = (1/data.dist)*1400
                 //var dist = data.dist >= 5 ? (1/data.dist)*1400 : 100
-                var dist = data.dist > 6 ? w * 3 * (1/data.dist) : w * 3 * .16
+                var dist = data.dist > 6 ? w * 2.6 * (1/data.dist) : w * 2.6 * .16
                 if (!Array.isArray(data.bg_common)) bg_common = []
                 graph.addLink(data.source, data.target, dist, data.bg_common)
             }
@@ -206,8 +210,8 @@ function myGraph(el) {
     }
 
     var vis = this.vis = d3.select(el).append("svg:svg")
-        .attr("width", w)
-        .attr("height", h);
+        .attr("width", "100%")
+        .attr("height", "100%");
 
     var force = this.force = d3.layout.force()
         .gravity(.05)

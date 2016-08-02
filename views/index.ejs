@@ -13,14 +13,21 @@
 </head>
 <body>
 	<div class="countrygraph" id="graph"></div>
+
+	<div class="graphinfo">
+		<p>Drag nodes as you please, click on edge to show list of common bigrams</p>
+	</div>
 	<div class="modal">
 		<div id="vmap" class="vmap"></div>
 	</div>
 	<div class="selection">
-				<p id="selecTitle">Your selection:</p>
-				<button class="selecBtn" id="emitButton" onclick="emit()">Graph 'em!</button>
-				<button class="selecBtn" id="reset" onclick="restart()">Reset</button>	
-			</div>
+		<p id="selecTitle">Your selection:</p>
+		<button class="selecBtn" id="emitButton" onclick="emit()">Graph 'em!</button>
+		<button class="selecBtn" id="reset" onclick="restart()">Reset</button>	
+	</div>
+	<div class="mapinfo">
+		<p>Click on country to select, click again to deselect</p>
+	</div>
 	
 </body>
 </html>
