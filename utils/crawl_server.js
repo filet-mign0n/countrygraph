@@ -4,8 +4,9 @@ var Promise = require('bluebird')
 var config = require('config')
 var wc = require('./word_counter.js')
 var db = require('./db.js')
+var cache = require('./cache.js')
 
-// allow cancellation of chain in case user restarts prematurely 
+// allow cancellation of chain in case client restarts prematurely 
 Promise.config({ cancellation: true });
 cancelled = false
 var r = Promise.resolve() // Promise chain for Crawl and noCrawl chains
@@ -14,7 +15,9 @@ var comp_r = Promise.resolve() // Promise chain for compare chain
 const list_countries_url = 'https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area'
 const source_url = 'https://en.wikipedia.org'
 
-var emittedCountries = []
+// globals to keep track of 
+var emittedCountries = [] // countries rendered to know which links to produce
+var session; // socket session for cache 
 
 module.exports = function(httpServer) {
 
@@ -24,12 +27,12 @@ module.exports = function(httpServer) {
             socket.on('c', function(data) {
                 if (Array.isArray(data) && data.length) {
                     cancelled = false
-                    r = Promise.resolve()
+                    r = Promise.resolve() //reset Promise chain
                     comp_r = Promise.resolve()
                     debug('socket on c', data)
                     emittedCountries.length = 0
 
-                    db.checkIfCrawledAlready(data)
+                    db.checkIfCrawled(data)
                         .then(function(countryList) {
                             
                             debug("checkedIfCrawled list", countryList)
@@ -98,8 +101,12 @@ function noCrawl(socket, countryList) {
                 compareArray.splice(compareArray.indexOf(c.name), 1)
                 debug(c.name+'\'s compareArray', compareArray)
 
-                if (compareArray.length) return compare(socket, c.name, compareArray)            
-                else return Promise.resolve()
+                if (compareArray.length) { 
+                    return compare(socket, c.name, compareArray);
+                } else { 
+                    console.log("DONE WITH", c.name); 
+                    return Promise.resolve();
+                }
             })
             .catch(function(e) { debug("noCrawl error", e) })
     })
@@ -161,8 +168,12 @@ function Crawl(socket, countryList) {
                                         compareArray.splice(compareArray.indexOf(c.name), 1)
                                         debug(c.name+'\'s compareArray', compareArray)
 
-                                        if (compareArray.length) return compare(socket, c.name, compareArray)            
-                                        else return Promise.resolve()
+                                        if (compareArray.length) { 
+                                            return compare(socket, c.name, compareArray)            
+                                        } else { 
+                                            console.log("DONE WITH", c.name); 
+                                            return Promise.resolve();
+                                        }
                                     })
                                     .catch(function(e) { debug("Crawl error",e) })
                             }
@@ -235,6 +246,8 @@ function compare(socket, country, countries) {
 
     return new Promise(function(res, rej) {
 
+        var countries2pop = countries.slice()
+
         countries.forEach(function(otherCountry, i, arr) {
             debug('compare countries forEach', otherCountry)
             
@@ -262,6 +275,9 @@ function compare(socket, country, countries) {
                         if (!cancelled) {
                             if (typeof(c) == 'string') c = JSON.parse(c)
                             socket.emit('crawl', c)
+
+                            countries2pop.splice(countries2pop.indexOf(c.target))
+                            if (!countries2pop.length) console.log("DONE WITH", c.source)//cache.REM(c.source)
                         }
                         res()
                     })

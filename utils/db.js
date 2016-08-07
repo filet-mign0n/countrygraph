@@ -94,13 +94,14 @@ exports.checkIfFreqDist = function(country) {
 	})
 }
 
+/* OLD VERSION
 exports.checkIfCrawledAlready = function(countryList) {
 	
 	return new Promise(function(res, rej) { 
 
 		//  c: list containing already crawled country names
 		// nc: list containing non-crawled country names 
-		ret = {c: [], nc: []}
+		var ret = {c: [], nc: []};
 	
 		countryList.forEach(function(country, i, arr) {
 			debug('checkIfCrawledAlready', country, i)
@@ -122,6 +123,36 @@ exports.checkIfCrawledAlready = function(countryList) {
 				if (i == arr.length-1) res(ret)
 			})
 		})
+	})
+
+}
+*/
+
+exports.checkIfCrawled = function(countryList) {
+	//  c: list containing already crawled country names
+	// nc: list containing non-crawled country names 
+	var ret = {c: [], nc: []};
+
+	return Promise.map(countryList, function(country) {
+		return Country.findOne({name: country}, function(err, c) {
+			if (err) { throw Error(err) }
+			if (c && c != 'undefined') {
+				if (c.name && c.name!='undefined' 
+					&& c.url && c.url!='undefined' 
+					&& c.flag && c.flag!='undefined') {
+						if (c.name.length>0 && c.url.length>0 && c.flag.length>0) {
+							debug('c.name, c.url, c.flag exist for '+country)
+							ret.c.push(country);
+							return country;	
+						} else { ret.nc.push(country); return country; }
+				} else { ret.nc.push(country); return country; }
+			} else { ret.nc.push(country); return country; }
+
+		})
+	}).then(function() {
+		return Promise.resolve(ret)
+	}).catch(function(e) {
+		return Promise.reject(e)
 	})
 
 }
