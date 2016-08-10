@@ -1,4 +1,5 @@
 const debug = require('debug')('countrygraph')  
+var redis = require('redis').createClient();
 var mongoose = require('mongoose')
 var Schema = mongoose.Schema
 var Promise = require('bluebird')
@@ -192,7 +193,6 @@ function _checkIfLink(country, otherCountry) {
 		Country.findOne({name: country}, function(err, c) {
 				if (err) { res({ err: err, ret: null}) }
 				if (c) {
-					//debug(country, '\'s edges:', c.edges)
 					var foundEdge = findEdge(otherCountry, c.edges)
 					if (foundEdge) {
 						debug('_checkIfLink found edge', { type: "link", source: country, target: otherCountry, "ret" : foundEdge})
@@ -210,7 +210,7 @@ function _checkIfLink(country, otherCountry) {
 }
 
 function findEdge(c, edges) {
-	debug('findEdge', c, edges)
+	debug('findEdge', c, 'has', edges.length, 'edges')
 	for (i in edges) { 
 		if (c === edges[i].country && !isNaN(edges[i].dist)) {
 			return {dist: edges[i].dist, bg_common: edges[i].bg_common}
@@ -219,10 +219,89 @@ function findEdge(c, edges) {
 	return false
 }
 
-exports.update_country = function (cond, update, callback) {
+exports.update_country = function(cond, update, callback) {
 
     var condition = {name: cond}
     var options = null
 
     Country.findOneAndUpdate(condition, update, options, callback)
 }
+
+exports.socketTTL = function(id) {
+
+	return new Promise(function(res, rej) {
+    
+	    var rdskey = 'sock_' + id;
+
+	    redis.multi()
+	      .incr(rdskey)
+	      .ttl(rdskey)
+	      .exec(function(err, replies) {
+	        if (err) {
+	          return rej(err);
+	        }
+
+	        // if this is new or has no expiry
+	        if (replies[0] === 1 || replies[1] === -1) {
+	          // then expire it after the timeout
+	          redis.expire(rdskey, 30);
+	        }
+	        // resolve TTL
+	        res(replies[0]);
+	      });
+
+	});
+
+  };
+
+exports.saveReq = function(ip) { 
+
+	key = 'persistIp_' + ip;
+	redis.exists(key, function(e, r) { 
+	  if (r == 1) {
+	    redis.hget(key, 'c', function(e, d) {
+	      if (e) { 
+	      	debug(e);
+	      } else { 
+	        var new_c = parseInt(d);
+	        new_c += 1;
+	        redis.hset(key, 'c', new_c, function(e,d) { 
+	          if (e) {
+	          	debug(e);
+	          } 
+	          return;
+	        })
+	      }
+	    })
+	  } else {
+	    redis.hmset(key,
+	    {
+	      c : 1, // request count
+	      t : Date.now() 
+	    },
+	    function(e,d) { 
+	      if (e) {
+	      	debug(e)
+	      } 
+	      return;
+	    })
+	  }
+	})
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -4,15 +4,28 @@ var express = require('express');
 var router = express.Router();
 var app = express();
 var args = process.argv.slice(2);
+var db = require('./utils/db')
+var RateLimit = require('express-rate-limit');
+var RedisStore = require('rate-limit-redis');
 var port = process.env.PORT || (parseInt(process.argv[2]) || 8000);
 port = (typeof port === "number") ? port : 8000;
+
+var reqLimiter = new RateLimit({
+	store: new RedisStore(),
+	max: 6
+});
 
 app.set('port', port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(logger('dev'));
-app.get('/', function(req, res) { res.render('index'); });
+app.use('/', reqLimiter);
+app.get('/', function(req, res) { 
+	var ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+	db.saveReq(ip)
+	res.render('index')
+});
 
 if(!module.parent) { 
    	var server = app.listen(app.get('port'), function() {

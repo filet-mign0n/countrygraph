@@ -1,4 +1,5 @@
 const debug = require('debug')('countrygraph')    
+const maxSockReqs = 3
 var Crawler = require("crawler")
 var Promise = require('bluebird')
 var config = require('config')
@@ -6,41 +7,45 @@ var wc = require('./word_counter.js')
 var db = require('./db.js')
 var cache = require('./cache.js')
 
-// allow cancellation of chain in case client restarts prematurely 
+// Allow cancellation of chain in case client restarts prematurely 
 Promise.config({ cancellation: true });
-cancelled = false
-var r = Promise.resolve() // Promise chain for Crawl and noCrawl chains
-var comp_r = Promise.resolve() // Promise chain for compare chain
+cancelled = false;
+var r = Promise.resolve(); // Promise chain for Crawl and noCrawl chains
+var comp_r = Promise.resolve(); // Promise chain for compare chain
 
 const list_countries_url = 'https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_area'
 const source_url = 'https://en.wikipedia.org'
 
-// globals to keep track of 
-var emittedCountries = [] // countries rendered to know which links to produce
-var session; // socket session for cache 
+// Globals to keep track of 
+var emittedCountries = [] // Countries rendered to know which links to produce
+var session; // Socket session for cache
 
 module.exports = function(httpServer) {
 
         var io = require('socket.io')(httpServer)
         io.sockets.on('connection', function(socket) {
-		  
+		    sockId = socket.handshake.address || socket.id
             socket.on('c', function(data) {
                 if (Array.isArray(data) && data.length) {
                     cancelled = false
-                    r = Promise.resolve() //reset Promise chain
+                    r = Promise.resolve() // Reset Promise chain
                     comp_r = Promise.resolve()
                     debug('socket on c', data)
                     emittedCountries.length = 0
 
-                    db.checkIfCrawled(data)
-                        .then(function(countryList) {
-                            
+                    db.socketTTL(sockId)
+                        .then(function(ttl) {
+                            if (ttl > maxSockReqs) {
+                                socket.emit('err', 'Too many WebSocket emissions, try again later'); 
+                                return Promise.reject(socket.id + ' did too many requests: ' + ttl + ' > ' + maxSockReqs);
+                            } else {
+                                return db.checkIfCrawled(data)
+                            }
+                        }).then(function(countryList) {
                             debug("checkedIfCrawled list", countryList)
                             if (countryList.c.length) noCrawl(socket, countryList)
                             if (countryList.nc.length) Crawl(socket, countryList)
-
-                        })
-                        .catch(function(e) { debug(e) })
+                        }).catch(function(e) { debug(e) })
 
                 }
             })
@@ -53,9 +58,6 @@ module.exports = function(httpServer) {
         })
 
 }
-
-
-var sessionCountries = {}
 
 
 // Already crawled

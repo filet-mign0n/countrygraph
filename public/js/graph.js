@@ -145,6 +145,11 @@ function ws(ws_url) {
 
     })
 
+    socket.on('err', function(data) {
+        alert(data)
+        restart()
+    })
+
     $(window).on("beforeunload", function() { 
         console.log('disconnecting socket before closing window')
         socket.disconnect()
