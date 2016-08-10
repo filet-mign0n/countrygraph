@@ -1,7 +1,6 @@
 #CountryGraph [![Build Status](https://travis-ci.org/filet-mign0n/countrygraph.svg?branch=master)](https://travis-ci.org/filet-mign0n/countrygraph)
 - - - -
 ##How it works
-
 ###Backend
 Real-time directed acyclic graph of dependencies. Flow control patterns in node.js, in this case Sequencial.
 
@@ -15,7 +14,6 @@ I found promises are well-suited to representing the complex IO dependency patte
 * Handle and propagate errors in a predictable, well-defined manner.
 
 ###Frontend 
-
 Via WebSockets events, a [D3js Force Directed Graph](https://bl.ocks.org/mbostock/4062045) is progressively built, first the nodes are generated, then edges are generated node by node, avoiding dubplication of work in the process.
 The graph is a physical simulation of charged particles and springs, it places related countries in closer proximity, while unrelated countries are farther apart. Layout algorithm inspired by Tim Dwyer and Thomas Jakobsen.
 
