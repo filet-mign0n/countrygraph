@@ -5,7 +5,6 @@ var Promise = require('bluebird')
 var config = require('config')
 var wc = require('./word_counter.js')
 var db = require('./db.js')
-var cache = require('./cache.js')
 
 // Allow cancellation of chain in case client restarts prematurely 
 Promise.config({ cancellation: true });
