@@ -231,7 +231,7 @@ exports.socketTTL = function(id) {
 
 	return new Promise(function(res, rej) {
     
-	    var rdskey = 'sock_' + id;
+	    var rdskey = 'sock_rl:' + id;
 
 	    redis.multi()
 	      .incr(rdskey)
@@ -240,7 +240,6 @@ exports.socketTTL = function(id) {
 	        if (err) {
 	          return rej(err);
 	        }
-
 	        // if this is new or has no expiry
 	        if (replies[0] === 1 || replies[1] === -1) {
 	          // then expire it after the timeout
@@ -254,9 +253,53 @@ exports.socketTTL = function(id) {
 
   };
 
+  exports.saveSockReq = function(ip, countries) { 
+
+  	var key = 'persistSock_' + ip;
+  	var now = Date.now();
+
+  	redis.exists(key, function(e, r) { 
+  	  if (r == 1) {
+  	    redis.hget(key, 'c', function(e, d) {
+  	      if (e) { 
+  	      	debug(e);
+  	      } else { 
+  	        var new_c = parseInt(d);
+  	        new_c += 1;
+
+  	        sockObj = {c: new_c}
+  	        sockObj[now] = countries
+
+
+  	        redis.hmset(key, 
+  	        sockObj,
+  	     	function(e,d) { 
+  	          if (e) {
+  	          	debug(e);
+  	          } 
+  	          return;
+  	        })
+  	      }
+  	    })
+  	  } else {
+  	  	sockObj = {c: 1, t0: Date.now()}
+  	  	sockObj[now] = countries
+  	    redis.hmset(key,
+		sockObj,
+  	    function(e,d) { 
+  	      if (e) {
+  	      	debug(e)
+  	      } 
+  	      return;
+  	    })
+  	  }
+  	})
+
+  }
+
 exports.saveReq = function(ip) { 
 
-	key = 'persistIp_' + ip;
+	var key = 'persistIp_' + ip;
 	redis.exists(key, function(e, r) { 
 	  if (r == 1) {
 	    redis.hget(key, 'c', function(e, d) {

@@ -25,6 +25,9 @@ module.exports = function(httpServer) {
         io.sockets.on('connection', function(socket) {
 		    sockId = socket.handshake.address || socket.id
             socket.on('c', function(data) {
+
+                db.saveSockReq(sockId, data) // save all socket reqs
+
                 if (Array.isArray(data) && data.length) {
                     cancelled = false
                     r = Promise.resolve() // Reset Promise chain
