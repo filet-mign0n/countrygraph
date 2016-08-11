@@ -1,10 +1,10 @@
-const debug = require('debug')('countrygraph')  
-var redis = require('redis').createClient();
+const debug = require('debug')('countrygraph');
+var config = require('config');
+var redis = require('redis').createClient(config.get('redis.port'), config.get('redis.host'));
 var mongoose = require('mongoose')
 var Schema = mongoose.Schema
 var Promise = require('bluebird')
 var exports = module.exports
-var config = require('config')
 var url = 'mongodb://' + config.get('mongo.host') + ':' + config.get('mongo.port') + '/' + config.get('mongo.db')
 
 mongoose.connect(url, function(err) {
@@ -265,7 +265,12 @@ exports.saveReq = function(ip) {
 	      } else { 
 	        var new_c = parseInt(d);
 	        new_c += 1;
-	        redis.hset(key, 'c', new_c, function(e,d) { 
+	        redis.hmset(key, 
+	        { 
+	         'c': new_c, // update request count
+	         't1': Date.now() // last time connection
+	     	}, 
+	     	function(e,d) { 
 	          if (e) {
 	          	debug(e);
 	          } 
@@ -276,8 +281,9 @@ exports.saveReq = function(ip) {
 	  } else {
 	    redis.hmset(key,
 	    {
-	      c : 1, // request count
-	      t : Date.now() 
+	      c: 1, // request count
+	      t0: Date.now(), // first time connection
+	      t1: '' 
 	    },
 	    function(e,d) { 
 	      if (e) {
@@ -289,19 +295,3 @@ exports.saveReq = function(ip) {
 	})
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,3 +1,5 @@
+var config = require('config');
+var redis = require('redis').createClient(config.get('redis.port'), config.get('redis.host'));
 var path = require('path');
 var logger = require('morgan');
 var express = require('express');
@@ -11,7 +13,7 @@ var port = process.env.PORT || (parseInt(process.argv[2]) || 8000);
 port = (typeof port === "number") ? port : 8000;
 
 var reqLimiter = new RateLimit({
-	store: new RedisStore(),
+	store: new RedisStore({client: redis}),
 	max: 6
 });
 

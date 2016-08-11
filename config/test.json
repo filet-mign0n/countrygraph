@@ -3,5 +3,10 @@
 		"host": "localhost",
 		"port": 27017,
 		"db": "test" 
+	},
+
+	"redis": {
+		"host": "localhost",
+		"port": 6379
 	}
 }
