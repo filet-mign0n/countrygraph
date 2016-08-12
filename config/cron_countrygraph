@@ -1,0 +1,21 @@
+#!/bin/sh
+
+USER="root"
+#NODE_ENV="production"
+PORT="8000"
+APP_DIR="/home/ubuntu/countrygraph"
+NODE_APP="app.js"
+CONFIG_DIR="$APP_DIR/config"
+LOG_DIR="$APP_DIR/log"
+LOG_FILE="$LOG_DIR/countrygraph.log"
+NODE_EXEC="/home/ubuntu/.nvm/versions/node/v5.8.0/bin/node"
+APP_NAME="CountryGraph"
+
+mkdir -p "$LOG_DIR"
+chown $USER:$USER "$LOG_DIR"
+
+echo "Starting $APP_NAME ..."
+until cd $APP_DIR && PORT=$PORT NODE_CONFIG_DIR=$CONFIG_DIR DEBUG=countrygraph $NODE_EXEC $APP_DIR/$NODE_APP 1>>$LOG_FILE 2>&1; do
+	echo "$APP_NAME crashed with exit code $?. Respawning.." >>$LOG_FILE 
+        sleep 1	
+done
