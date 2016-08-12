@@ -268,7 +268,7 @@ exports.socketTTL = function(id) {
   	        new_c += 1;
 
   	        sockObj = {c: new_c}
-  	        sockObj[now] = countries
+  	        sockObj[now] = countries.toString()
 
 
   	        redis.hmset(key, 
@@ -283,7 +283,7 @@ exports.socketTTL = function(id) {
   	    })
   	  } else {
   	  	sockObj = {c: 1, t0: Date.now()}
-  	  	sockObj[now] = countries
+  	  	sockObj[now] = countries.toString()
   	    redis.hmset(key,
 		sockObj,
   	    function(e,d) { 
