@@ -3,7 +3,8 @@
 *.swo
 *.pyc
 .npm
-.grunt
+/pid/*
+/log/*
 sample_list.txt
 node_modules
 npm-debug.log*
