@@ -16,6 +16,6 @@ chown $USER:$USER "$LOG_DIR"
 
 echo "Starting $APP_NAME ..."
 until cd $APP_DIR && PORT=$PORT NODE_CONFIG_DIR=$CONFIG_DIR DEBUG=countrygraph $NODE_EXEC $APP_DIR/$NODE_APP 1>>$LOG_FILE 2>&1; do
-	echo "$APP_NAME crashed with exit code $?. Respawning.." >>$LOG_FILE 
+	echo $(date) "$APP_NAME crashed with exit code $?. Respawning.." >>$LOG_FILE 
         sleep 1	
 done
