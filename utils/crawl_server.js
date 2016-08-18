@@ -21,43 +21,43 @@ var session; // Socket session for cache
 
 module.exports = function(httpServer) {
 
-        var io = require('socket.io')(httpServer)
-        io.sockets.on('connection', function(socket) {
-		    sockId = socket.handshake.address || socket.id
-            socket.on('c', function(data) {
+    var io = require('socket.io')(httpServer)
+    io.sockets.on('connection', function(socket) {
+	    sockId = socket.handshake.address || socket.id
+        socket.on('c', function(data) {
 
-                db.saveSockReq(sockId, data) // save all socket reqs
+            db.saveSockReq(sockId, data) // save socket reqs
 
-                if (Array.isArray(data) && data.length) {
-                    cancelled = false
-                    r = Promise.resolve() // Reset Promise chain
-                    comp_r = Promise.resolve()
-                    debug('socket on c', data)
-                    emittedCountries.length = 0
+            if (Array.isArray(data) && data.length) {
+                cancelled = false
+                r = Promise.resolve() // Reset Promise chain
+                comp_r = Promise.resolve()
+                debug('socket on c', data)
+                emittedCountries.length = 0
 
-                    db.socketTTL(sockId)
-                        .then(function(ttl) {
-                            if (ttl > maxSockReqs) {
-                                socket.emit('err', 'Too many WebSocket emissions, try again later'); 
-                                return Promise.reject(socket.id + ' did too many requests: ' + ttl + ' > ' + maxSockReqs);
-                            } else {
-                                return db.checkIfCrawled(data)
-                            }
-                        }).then(function(countryList) {
-                            debug("checkedIfCrawled list", countryList)
-                            if (countryList.c.length) noCrawl(socket, countryList)
-                            if (countryList.nc.length) Crawl(socket, countryList)
-                        }).catch(function(e) { debug(e) })
+                db.socketTTL(sockId)
+                    .then(function(ttl) {
+                        if (ttl > maxSockReqs) {
+                            socket.emit('err', 'Too many WebSocket emissions, try again later'); 
+                            return Promise.reject(socket.id + ' did too many requests: ' + ttl + ' > ' + maxSockReqs);
+                        } else {
+                            return db.checkIfCrawled(data)
+                        }
+                    }).then(function(countryList) {
+                        debug("checkedIfCrawled list", countryList)
+                        if (countryList.c.length) noCrawl(socket, countryList)
+                        if (countryList.nc.length) Crawl(socket, countryList)
+                    }).catch(function(e) { debug(e) })
 
-                }
-            })
-
-            socket.on('cancel', function() {
-                debug('client cancelled')
-                cancelled = true
-            })
-          
+            }
         })
+
+        socket.on('cancel', function() {
+            debug('client cancelled')
+            cancelled = true
+        })
+      
+    })
 
 }
 

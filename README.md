@@ -5,7 +5,12 @@ Compare the history of countries by rendering a force directed graph. Try live v
 
 ##How it works
 
+<img src="https://raw.githubusercontent.com/filet-mign0n/filet-mignon.github.io/master/images/countrygraph.png">
+
 ###Backend
+
+Promises excel at representing dependency directed acyclic graphs (DAGs) 
+
 Real-time directed acyclic graph of dependencies. Flow control patterns in node.js, in this case Sequencial.
 
 Tasks are transactional, in the sense that they either completely fail or completely succeed.
@@ -16,6 +21,14 @@ I found promises are well-suited to representing the complex IO dependency patte
 * Provide a uniform interface to chain sequential steps in a pipeline in the form of the .then() method.
 * Always proceed from one step of a pipeline to the next asynchronously.
 * Handle and propagate errors in a predictable, well-defined manner.
+
+chain operations that depend on each other
+
+only uses one thread
+
+A common use case, we wish to retrieve some data that is not mandatory to rendering a page. In that case, we handle this case by logging the error or exception that happened while fetching the data and returning a default value
+
+
 
 ###Frontend 
 Via WebSockets events, a [D3js Force Directed Graph](https://bl.ocks.org/mbostock/4062045) is progressively built, first the nodes are generated, then edges are generated node by node, avoiding dubplication of work in the process.
