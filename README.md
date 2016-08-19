@@ -5,7 +5,7 @@ Compare the history of countries by rendering a force directed graph. Try live v
 
 ##How it works
 
-<img src="https://raw.githubusercontent.com/filet-mign0n/filet-mignon.github.io/master/images/countrygraph.png">
+<img src="https://raw.githubusercontent.com/filet-mign0n/filet-mignon.github.io/master/images/countrygraph_diagram.png">
 
 ###Backend
 
