@@ -1,7 +1,7 @@
 CountryGraph [![Build Status](https://travis-ci.org/filet-mign0n/countrygraph.svg?branch=master)](https://travis-ci.org/filet-mign0n/countrygraph)
 ========
 
-Compare the history of countries by rendering a force directed graph. Try live version [here](http://ec2-54-186-48-151.us-west-2.compute.amazonaws.com)
+Compare the history of countries by rendering a force directed graph. Try live version [here](http://plasti.city)
 
 ##How it works
 
