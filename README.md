@@ -3,7 +3,7 @@ CountryGraph [![Build Status](https://travis-ci.org/filet-mign0n/countrygraph.sv
 
 Compare the history of countries by rendering a force directed graph. Try live version [here](http://plasti.city/?utm_source=github)
 
-##How it works
+## How it works
 
 <img src="https://raw.githubusercontent.com/filet-mign0n/filet-mignon.github.io/master/images/countrygraph_diagram.png">
 
